@@ -1,0 +1,9 @@
+# Build artifacts
+proot/src/doki-proot
+proot/src/*.o
+build/
+*.log
+
+# Git metadata in subdirectories
+proot/.gitignore
+proot/.github/
