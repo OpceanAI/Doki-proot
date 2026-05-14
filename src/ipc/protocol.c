@@ -26,6 +26,8 @@ static int parse_type(const char *json) {
     if (strncmp(val, "signal", 6) == 0) return 2;
     if (strncmp(val, "health", 6) == 0) return 3;
     if (strncmp(val, "shutdown", 8) == 0) return 4;
+    if (strncmp(val, "subscribe", 9) == 0) return 5;
+    if (strncmp(val, "unsubscribe", 11) == 0) return 6;
 
     return -1;
 }
@@ -107,6 +109,20 @@ void ipc_process_message(int client_fd, const char *json_msg) {
         char response[256];
         snprintf(response, sizeof(response),
                  "{\"type\":\"shutdown_ack\",\"status\":\"ok\"}\n");
+        send(client_fd, response, strlen(response), 0);
+        break;
+    }
+    case 5: { /* subscribe */
+        char response[256];
+        snprintf(response, sizeof(response),
+                 "{\"type\":\"subscribe_ack\",\"status\":\"ok\"}\n");
+        send(client_fd, response, strlen(response), 0);
+        break;
+    }
+    case 6: { /* unsubscribe */
+        char response[256];
+        snprintf(response, sizeof(response),
+                 "{\"type\":\"unsubscribe_ack\",\"status\":\"ok\"}\n");
         send(client_fd, response, strlen(response), 0);
         break;
     }

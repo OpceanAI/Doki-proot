@@ -67,3 +67,23 @@ const char *doki_hidden_check_path(const char *path) {
 
     return NULL;
 }
+
+void doki_hidden_clear(void) {
+    hidden_count = 0;
+    config_loaded = 0;
+}
+
+void doki_hidden_add_path(const char *path) {
+    if (hidden_count >= DOKI_HIDDEN_MAX_FILES || !path) return;
+    size_t len = strlen(path);
+    if (len > 0 && len < sizeof(hidden_entries[0].path)) {
+        memcpy(hidden_entries[hidden_count].path, path, len);
+        hidden_entries[hidden_count].path[len] = '\0';
+        hidden_count++;
+    }
+    config_loaded = 1;
+}
+
+int doki_hidden_count(void) {
+    return hidden_count;
+}
