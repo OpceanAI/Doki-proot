@@ -47,6 +47,12 @@ typedef unsigned char byte_t;
 #        define ARCH_X86 1
 #    elif defined(__SH4__)
 #        define ARCH_SH4 1
+#    elif defined(__riscv)
+#        if __riscv_xlen == 64
+#            define ARCH_RISCV64 1
+#        endif
+#    elif defined(__mips__)
+#        define ARCH_MIPS 1
 #    else
 #        error "Unsupported architecture"
 #    endif
