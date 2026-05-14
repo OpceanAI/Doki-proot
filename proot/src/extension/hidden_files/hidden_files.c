@@ -66,14 +66,15 @@ static int handle_getdents(Tracee *tracee)
     case PR_getdents: {
         /* get the result of the syscall, which is the number of bytes read by getdents */
         unsigned int res = peek_reg(tracee, CURRENT, SYSARG_RESULT);
-        if (res <= 0) {
+        if (res <= 0 || res > 65536) {  /* VLA safety: limit to 64KB */
             return res;
         }
 
         /* get the system call arguments */
         word_t orig_start = peek_reg(tracee, CURRENT, SYSARG_2);
         unsigned int count = peek_reg(tracee, CURRENT, SYSARG_3);
-        char orig[count];
+        if (count > 65536) return 0;  /* VLA safety */
+        char orig[res];
 
         char path[PATH_MAX];
         int status = readlink_proc_pid_fd(tracee->pid, peek_reg(tracee, ORIGINAL, SYSARG_1), path);
