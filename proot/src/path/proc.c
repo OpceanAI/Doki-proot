@@ -49,12 +49,9 @@ Action readlink_proc(const Tracee *tracee, char result[PATH_MAX],
 	int status;
 	pid_t pid;
 
-	/* TODO: Following assertion fails on some devices
-	 * https://github.com/termux/termux-packages/issues/1679
-	 */
-	//assert(comparison == compare_paths("/proc", base));
-
-	/* Remember: comparison = compare_paths("/proc", base)  */
+	/* Verify comparison matches expected /proc prefix */
+	if (comparison != compare_paths("/proc", base) && comparison != PATH1_IS_PREFIX)
+		return DEFAULT;
 	switch (comparison) {
 	case PATHS_ARE_EQUAL:
 		/* Substitute "/proc/self" with "/proc/<PID>".  */

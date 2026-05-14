@@ -266,7 +266,9 @@ int substitute_binding(const Tracee *tracee, Side side, char path[PATH_MAX])
 		return -EACCES;
 	}
 
-	substitute_path_prefix(path, ref->length, reverse_ref->path, reverse_ref->length);
+	size_t new_len = substitute_path_prefix(path, ref->length, reverse_ref->path, reverse_ref->length);
+	if (new_len >= PATH_MAX)
+		return -ENAMETOOLONG;
 
 	return 1;
 }
