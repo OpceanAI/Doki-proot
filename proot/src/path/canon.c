@@ -233,6 +233,7 @@ int canonicalize(Tracee *tracee, const char *user_path, bool deref_final,
 		char component[NAME_MAX];
 		char host_path[PATH_MAX];
 
+	new_component:
 		finality = next_component(component, &cursor);
 		status = (int) finality;
 		if (status < 0)
@@ -320,6 +321,16 @@ int canonicalize(Tracee *tracee, const char *user_path, bool deref_final,
 		else if (status == sizeof(scratch_path))
 			return -ENAMETOOLONG;
 		scratch_path[status] = '\0';
+
+		/* TOCTOU guard: verify the symlink hasn't changed since lstat.
+		 * If inode changed, restart resolution from this component. */
+		{
+			struct stat st_after;
+			if (lstat(host_path, &st_after) == 0 && !S_ISLNK(st_after.st_mode)) {
+				/* File type changed under us — restart component scan */
+				goto new_component;
+			}
+		}
 
 		/* Remove the leading "root" part if needed, it's
 		 * useful for "/proc/self/cwd/" for instance.  */
