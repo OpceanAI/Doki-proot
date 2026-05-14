@@ -22,6 +22,10 @@
 
 #include <sys/types.h> /* pid_t */
 #include <limits.h>    /* PATH_MAX, */
+/* Allow PROOT_MAX_SYMLINKS env override at compile time */
+#ifndef PROOT_MAX_SYMLINKS
+#define PROOT_MAX_SYMLINKS 40
+#endif
 #include <sys/param.h> /* MAXSYMLINKS, */
 #include <errno.h>     /* E*, */
 #include <sys/stat.h>  /* lstat(2), S_ISREG(), */
@@ -205,7 +209,7 @@ int canonicalize(Tracee *tracee, const char *user_path, bool deref_final,
 	int status;
 
 	/* Avoid infinite loop on circular links.  */
-	if (recursion_level > MAXSYMLINKS)
+	if (recursion_level > PROOT_MAX_SYMLINKS)
 		return -ELOOP;
 
 	/* Sanity checks.  */
