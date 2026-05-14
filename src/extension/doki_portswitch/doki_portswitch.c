@@ -74,17 +74,17 @@ int doki_portswitch_has_maps(void) {
     return port_map_count > 0;
 }
 
-const port_map_t *doki_portswitch_find_tcp(int port) {
+const port_map_t *doki_portswitch_find(int port, const char *proto) {
     for (int i = 0; i < port_map_count; i++) {
         if (port_maps[i].guest_port == port &&
-            strcmp(port_maps[i].proto, "tcp") == 0) {
+            strcmp(port_maps[i].proto, proto) == 0) {
             return &port_maps[i];
         }
     }
     return NULL;
 }
 
-int doki_portswitch_remap_port(int guest_port) {
-    const port_map_t *m = doki_portswitch_find_tcp(guest_port);
+int doki_portswitch_remap_port(int guest_port, const char *proto) {
+    const port_map_t *m = doki_portswitch_find(guest_port, proto);
     return m ? m->host_port : guest_port;
 }
