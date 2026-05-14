@@ -477,8 +477,19 @@ int read_string(const Tracee *tracee, char *dest_tracer, word_t src_tracee, word
 		remote.iov_len  = size;
 
 		status = process_vm_readv(tracee->pid, &local, 1, &remote, 1, 0);
-		if ((size_t) status != size)
+		if ((size_t) status != size) {
+			/* Partial read: check if a NUL byte was read */
+			ssize_t partial = (status > 0) ? status : 0;
+			if (partial > 0) {
+				ssize_t nul_pos = strnlen(local.iov_base, partial);
+				if ((size_t)nul_pos < (size_t)partial) {
+					size = offset + nul_pos + 1;
+					assert(size <= max_size);
+					return size;
+				}
+			}
 			goto fallback;
+		}
 
 		status = strnlen(local.iov_base, size);
 		if ((size_t) status < size) {
@@ -657,7 +668,7 @@ word_t alloc_mem(Tracee *tracee, ssize_t size)
 
 	/* Sanity check. */
 	if (   (size > 0 && stack_pointer <= (word_t) size)
-	    || (size < 0 && stack_pointer >= ULONG_MAX + size)) {
+	    || (size < 0 && stack_pointer >= (word_t)(~(word_t)0 + size + 1))) {
 		note(tracee, WARNING, INTERNAL, "integer under/overflow detected in %s",
 			__FUNCTION__);
 		return 0;

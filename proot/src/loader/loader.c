@@ -44,7 +44,7 @@
 #endif
 
 #define FATAL() do {						\
-		SYSCALL(EXIT, 1, 182);				\
+		SYSCALL(EXIT, 1, 219);			\
 		__builtin_unreachable();			\
 	} while (0)
 
@@ -116,6 +116,10 @@ void _start(void *cursor)
 
 	word_t fd = -1;
 	word_t status;
+	int auxv_count = 0;
+
+	if (cursor == 0)
+		FATAL();
 
 	while(1) {
 		LoadStatement *stmt = cursor;
@@ -206,6 +210,7 @@ void _start(void *cursor)
 			cursor2++;
 
 			/* Adjust auxv[].  */
+			auxv_count = 0;
 			do {
 				switch (cursor2[0]) {
 				case AT_PHDR:
@@ -229,9 +234,6 @@ void _start(void *cursor)
 					break;
 
 				case AT_EXECFN:
-					/* stmt->start.at_execfn can't be used for now since it is
-					 * currently stored in a location that will be scratched
-					 * by the process (below the final stack pointer).  */
 					cursor2[1] = at_execfn;
 					break;
 
@@ -239,7 +241,8 @@ void _start(void *cursor)
 					break;
 				}
 				cursor2 += 2;
-			} while (cursor2[0] != AT_NULL);
+				auxv_count++;
+			} while (cursor2[0] != AT_NULL && auxv_count < 64);
 
 			/* Note that only 2 arguments are actually necessary... */
 			name = basename(stmt->start.at_execfn);

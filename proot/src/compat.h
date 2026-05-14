@@ -195,6 +195,24 @@
 #    ifndef PTRACE_SINGLEBLOCK
 #        define PTRACE_SINGLEBLOCK	33
 #    endif
+#    ifndef PTRACE_GET_SYSCALL_INFO
+#        define PTRACE_GET_SYSCALL_INFO	0x420e
+#    endif
+#    ifndef PTRACE_PEEKSIGINFO
+#        define PTRACE_PEEKSIGINFO	0x4209
+#    endif
+#    ifndef PTRACE_GETSIGMASK
+#        define PTRACE_GETSIGMASK		0x420a
+#    endif
+#    ifndef PTRACE_SETSIGMASK
+#        define PTRACE_SETSIGMASK		0x420b
+#    endif
+#    ifndef PTRACE_GET_RSEQ_CONFIGURATION
+#        define PTRACE_GET_RSEQ_CONFIGURATION	0x420f
+#    endif
+#    ifndef PTRACE_SECCOMP_GET_FILTER
+#        define PTRACE_SECCOMP_GET_FILTER	0x420c
+#    endif
 #    ifndef ADDR_NO_RANDOMIZE
 #        define ADDR_NO_RANDOMIZE	0x0040000
 #    endif

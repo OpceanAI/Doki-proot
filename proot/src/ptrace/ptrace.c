@@ -81,6 +81,9 @@ static const char *stringify_ptrace(
 	CASE_STR(PTRACE_LISTEN)		CASE_STR(PTRACE_SET_SYSCALL)
 	CASE_STR(PTRACE_GET_THREAD_AREA)	CASE_STR(PTRACE_SET_THREAD_AREA)
 	CASE_STR(PTRACE_GETVFPREGS)	CASE_STR(PTRACE_SINGLEBLOCK)	CASE_STR(PTRACE_ARCH_PRCTL)
+	CASE_STR(PTRACE_GET_SYSCALL_INFO)	CASE_STR(PTRACE_PEEKSIGINFO)
+	CASE_STR(PTRACE_GETSIGMASK)	CASE_STR(PTRACE_SETSIGMASK)
+	CASE_STR(PTRACE_GET_RSEQ_CONFIGURATION)	CASE_STR(PTRACE_SECCOMP_GET_FILTER)
 	default: return "PTRACE_???"; }
 }
 
@@ -647,6 +650,31 @@ int translate_ptrace_exit(Tracee *tracee)
 			return -errno;
 
 		return 0;  /* Don't restart the ptracee.  */
+
+	case PTRACE_SEIZE:
+		status = ptrace(request, pid, address, data);
+		if (status < 0)
+			return -errno;
+		attach_to_ptracer(ptracee, ptracer);
+		return 0;
+
+	case PTRACE_INTERRUPT:
+	case PTRACE_LISTEN:
+		status = ptrace(request, pid, address, data);
+		if (status < 0)
+			return -errno;
+		return 0;
+
+	case PTRACE_GET_SYSCALL_INFO:
+	case PTRACE_PEEKSIGINFO:
+	case PTRACE_GETSIGMASK:
+	case PTRACE_SETSIGMASK:
+	case PTRACE_GET_RSEQ_CONFIGURATION:
+	case PTRACE_SECCOMP_GET_FILTER:
+		status = ptrace(request, pid, address, data);
+		if (status < 0)
+			return -errno;
+		return 0;
 
 	default:
 		note(ptracer, WARNING, INTERNAL, "ptrace request '%s' not supported yet",
