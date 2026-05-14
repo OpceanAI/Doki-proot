@@ -116,6 +116,17 @@ int daemon_main(const char *socket_path, const char *config_path,
 
     g_rootfs = rootfs_path ? rootfs_path : "/";
 
+    /* Daemon init: umask, working dir, close stdin, write PID file */
+    umask(022);
+    chdir("/");
+    freopen("/dev/null", "r", stdin);
+    /* Write PID file */
+    FILE *pidf = fopen("/tmp/doki-proot.pid", "w");
+    if (pidf) {
+        fprintf(pidf, "%d\n", getpid());
+        fclose(pidf);
+    }
+
     if (!socket_path) {
         socket_path = DEFAULT_SOCKET_PATH;
     }
