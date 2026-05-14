@@ -159,7 +159,7 @@ int handle_stat_exit_end(Tracee *tracee, Config *config, word_t sysnum) {
 
 int fake_id0_handle_statx_syscall(Tracee *tracee, Config *config, uintptr_t statx_state_raw) {
 	(void) tracee;
-	// TODO: USERLAND
+	(void) config;
 	struct statx_syscall_state *state = (struct statx_syscall_state *) statx_state_raw;
 	if (state->statx_buf.stx_mask & STATX_UID) {
 		if (state->statx_buf.stx_uid == getuid()) {

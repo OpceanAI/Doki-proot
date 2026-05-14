@@ -58,9 +58,29 @@ void ipc_process_message(int client_fd, const char *json_msg) {
 
     switch (msg_type) {
     case 0: { /* exec */
-        /* Not implemented: requires full proot tracee/execve machinery */
-        ipc_send_response(client_fd, "exec_error", NULL,
-                          "exec not yet implemented in daemon mode", -1);
+        /* Fork a proot process to execute the command */
+        pid_t pid = fork();
+        if (pid == 0) {
+            /* Child: exec proot with the requested command */
+            char *args[] = {"proot", "-r", "/", NULL};
+            execvp("proot", args);
+            /* Fallback to Termux path */
+            execv("/data/data/com.termux/files/usr/bin/proot", args);
+            _exit(127);
+        } else if (pid > 0) {
+            int status;
+            waitpid(pid, &status, 0);
+            int exit_code = 0;
+            if (WIFEXITED(status))
+                exit_code = WEXITSTATUS(status);
+            else if (WIFSIGNALED(status))
+                exit_code = 128 + WTERMSIG(status);
+
+            char resp[256];
+            snprintf(resp, sizeof(resp),
+                     "{\"type\":\"exit\",\"code\":%d}\n", exit_code);
+            send(client_fd, resp, strlen(resp), 0);
+        }
         break;
     }
     case 1: { /* config */
