@@ -192,9 +192,9 @@ void mod_port(Tracee *tracee, bool is_socketcall, bool is_bind, bool is_udp, str
             struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)my_sockaddr;
             if(ntohs(in6->sin6_port) > 0 && ntohs(in6->sin6_port) < PORT_THRESHOLD) {
                 if(is_bind) {
-                    printf("\nATTENTION: A bind system call was requested on port: %d\n", ntohs(in6->sin6_port));
+                    fprintf(stderr, "\nATTENTION: A bind system call was requested on port: %d\n", ntohs(in6->sin6_port));
                     in6->sin6_port = htons(ntohs(in6->sin6_port) + PORT_ADDITION);
-                    printf("The port has been changed. If connecting from outside Termux, use: %d\n\n", ntohs(in6->sin6_port));
+                    fprintf(stderr, "The port has been changed. If connecting from outside Termux, use: %d\n\n", ntohs(in6->sin6_port));
                 }
                 else
                     in6->sin6_port = htons(ntohs(in6->sin6_port) + PORT_ADDITION);
@@ -204,7 +204,7 @@ void mod_port(Tracee *tracee, bool is_socketcall, bool is_bind, bool is_udp, str
                     write_data(tracee, peek_reg(tracee, CURRENT, SYSARG_2), socketcall_arg2, sizeof(socketcall_arg2));
                 }
 
-                else if(is_socketcall && is_udp)
+                else if(!is_socketcall && is_udp)
                     write_data(tracee, peek_reg(tracee, CURRENT, SYSARG_5), in6, sizeof(in6));
 
                 else if(is_socketcall && !is_udp) { 

@@ -28,7 +28,7 @@
 #endif
 
 
-#define SYSVIPC_MAX_SHM_SIZE 100 * 4096
+#define SYSVIPC_MAX_SHM_SIZE 64 * 1024 * 1024
 
 struct SysVIpcRecvMsgPointers {
 	word_t msghdr_ptr;
