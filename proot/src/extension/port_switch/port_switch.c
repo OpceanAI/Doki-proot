@@ -162,9 +162,9 @@ void mod_port(Tracee *tracee, bool is_socketcall, bool is_bind, bool is_udp, str
             if(ntohs(in->sin_port) > 0 && ntohs(in->sin_port) < PORT_THRESHOLD) {
 
                 if(is_bind) {
-                    printf("\nATTENTION: A bind system call was requested on port: %d\n", ntohs(in->sin_port));
+                    fprintf(stderr, "\nATTENTION: A bind system call was requested on port: %d\n", ntohs(in->sin_port));
                     in->sin_port = htons(ntohs(in->sin_port) + PORT_ADDITION);
-                    printf("The port has been changed. If connecting from outside Termux, use: %d\n\n", ntohs(in->sin_port));
+                    fprintf(stderr, "The port has been changed. If connecting from outside Termux, use: %d\n\n", ntohs(in->sin_port));
                 }
                 else
                    in->sin_port = htons(ntohs(in->sin_port) + PORT_ADDITION); 

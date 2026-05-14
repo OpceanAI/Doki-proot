@@ -144,11 +144,16 @@ static int handle_getdents(Tracee *tracee)
         }
         /* If there is nothing left */
         if (!nleft) {
-            /* call getdents again */
-            if (get_sysnum(tracee, ORIGINAL) == PR_getdents64)
-                register_chained_syscall(tracee, PR_getdents64, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
-            else
-                register_chained_syscall(tracee, PR_getdents, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
+            /* Only chain if we had actual results to filter, not at EOF */
+            if (res > 0) {
+                if (get_sysnum(tracee, ORIGINAL) == PR_getdents64)
+                    register_chained_syscall(tracee, PR_getdents64, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
+                else
+                    register_chained_syscall(tracee, PR_getdents, peek_reg(tracee, ORIGINAL, SYSARG_1), orig_start, count, 0, 0, 0);
+            } else {
+                /* EOF reached, return 0 */
+                poke_reg(tracee, SYSARG_RESULT, 0);
+            }
         }
         else {
             /* copy the data back into the register */
