@@ -62,6 +62,12 @@ static void handle_message(client_t *client) {
         memcpy(client->buffer + client->buffer_len, temp, (size_t)n);
         client->buffer_len += (size_t)n;
         client->buffer[client->buffer_len] = '\0';
+    } else {
+        fprintf(stderr, "{\"type\":\"error\",\"msg\":\"client buffer overflow\"}\n");
+        close(client->fd);
+        client->fd = 0;
+        client->buffer_len = 0;
+        return;
     }
 
     char *newline;

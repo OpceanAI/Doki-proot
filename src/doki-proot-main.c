@@ -114,23 +114,46 @@ static int json_get_string_array(const char *json, const char *key,
 /*
  * Build response JSON and send to client.
  */
+/*
+ * Escape a string for JSON: replace \, ", \n, \r, \t with escaped versions.
+ * Writes to dst (must be large enough - 2x src length is safe).
+ */
+static void json_escape(const char *src, char *dst, size_t dst_size) {
+    size_t j = 0;
+    for (size_t i = 0; src[i] && j < dst_size - 1; i++) {
+        switch (src[i]) {
+        case '\\': dst[j++] = '\\'; if (j < dst_size-1) dst[j++] = '\\'; break;
+        case '"':  dst[j++] = '\\'; if (j < dst_size-1) dst[j++] = '"';  break;
+        case '\n': dst[j++] = '\\'; if (j < dst_size-1) dst[j++] = 'n';  break;
+        case '\r': dst[j++] = '\\'; if (j < dst_size-1) dst[j++] = 'r';  break;
+        case '\t': dst[j++] = '\\'; if (j < dst_size-1) dst[j++] = 't';  break;
+        default:   dst[j++] = src[i]; break;
+        }
+    }
+    dst[j] = '\0';
+}
+
 static void send_response(int fd, const char *type, const char *id,
                           const char *data, int code) {
     char buf[4096];
     int len;
 
     if (data && id[0]) {
+        char escaped[8192];
+        json_escape(data, escaped, sizeof(escaped));
         len = snprintf(buf, sizeof(buf),
                        "{\"type\":\"%s\",\"id\":\"%s\",\"data\":\"%s\",\"code\":%d}\n",
-                       type, id, data, code);
+                       type, id, escaped, code);
     } else if (id[0]) {
         len = snprintf(buf, sizeof(buf),
                        "{\"type\":\"%s\",\"id\":\"%s\",\"code\":%d}\n",
                        type, id, code);
     } else if (data) {
+        char escaped[8192];
+        json_escape(data, escaped, sizeof(escaped));
         len = snprintf(buf, sizeof(buf),
                        "{\"type\":\"%s\",\"data\":\"%s\"}\n",
-                       type, data);
+                       type, escaped);
     } else {
         len = snprintf(buf, sizeof(buf),
                        "{\"type\":\"%s\",\"code\":%d}\n",
@@ -281,7 +304,11 @@ static void handle_exec(int fd, const char *json, const char *extra_args) {
  * Handle config message: parse hidden_files and port_map.
  */
 static void handle_config(int fd, const char *json) {
-    fprintf(stderr, "{\"type\":\"log\",\"msg\":\"config received\"}\n");
+    /* Store config for use with subsequent exec commands.
+     * The hidden_files and port_map are passed as proot CLI args
+     * via the extra_args mechanism. */
+    fprintf(stderr, "{\"type\":\"log\",\"msg\":\"config stored\",\"size\":%zu}\n",
+            strlen(json));
     send_response(fd, "config_ack", "", NULL, 0);
 }
 
