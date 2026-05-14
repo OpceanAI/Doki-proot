@@ -126,16 +126,22 @@ static int parse_kernel_release(const char *release)
 	unsigned long revision = 0;
 	char *cursor = (char *)release;
 
+	errno = 0;
 	major = strtoul(cursor, &cursor, 10);
+	if (errno == ERANGE) return KERNEL_VERSION(6,6,0);
 
 	if (*cursor == '.') {
 		cursor++;
+		errno = 0;
 		minor = strtoul(cursor, &cursor, 10);
+		if (errno == ERANGE) return KERNEL_VERSION(6,6,0);
 	}
 
 	if (*cursor == '.') {
 		cursor++;
+		errno = 0;
 		revision = strtoul(cursor, &cursor, 10);
+		if (errno == ERANGE) return KERNEL_VERSION(6,6,0);
 	}
 
 	return KERNEL_VERSION(major, minor, revision);
