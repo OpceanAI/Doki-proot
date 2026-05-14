@@ -308,6 +308,14 @@ int event_loop()
 			 * they are related to tty and job control.  */
 			continue;
 
+		case SIGINT:
+		case SIGTERM:
+		case SIGHUP:
+			/* Forward terminating signals to all tracees
+			 * for graceful shutdown. */
+			signal_action.sa_sigaction = kill_all_tracees2;
+			break;
+
 		default:
 			/* Ignore all other signals, including
 			 * terminating ones (^C for instance). */
