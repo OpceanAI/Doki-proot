@@ -15,8 +15,8 @@ OBJCOPY  ?= $(CROSS_COMPILE)objcopy
 OBJDUMP  ?= $(CROSS_COMPILE)objdump
 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I. -I$(VPATH)
-CFLAGS   += -Wall -Wextra -O2
-LDFLAGS  += -ltalloc -Wl,-z,noexecstack
+CFLAGS   += -Wall -Wextra -O2 -g -fstack-protector-strong -D_FORTIFY_SOURCE=2
+LDFLAGS  += -ltalloc -Wl,-z,noexecstack -Wl,-z,relro,-z,now
 
 OBJECTS += \
 	cli/cli.o		\
