@@ -163,7 +163,7 @@ static int move_and_symlink_path(Tracee *tracee, Reg sysarg, Reg link_target_sys
 		link_count++;
 
 		strncpy(new_final, final, strlen(final) - 4);
-		sprintf(new_final + strlen(final) - 4, "%04d", link_count);
+		sprintf(new_final + strlen(new_final), "%04d", link_count);
 
 		status = rename(final, new_final);
 		if (status < 0)
