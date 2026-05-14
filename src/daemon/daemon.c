@@ -167,7 +167,7 @@ int daemon_main(const char *socket_path, const char *config_path,
         }
 
         struct timeval tv;
-        tv.tv_sec = 1;
+        tv.tv_sec = 30;  /* request timeout */
         tv.tv_usec = 0;
 
         int ret = select(max_fd + 1, &readfds, NULL, NULL, &tv);

@@ -208,7 +208,11 @@ static void handle_exec(int fd, const char *json, const char *extra_args) {
 
     pid_t pid = fork();
     if (pid == 0) {
-        /* Child: redirect stdout/stderr to pipes, exec proot */
+        /* Child: reset signal handlers inherited from parent */
+        signal(SIGTERM, SIG_DFL);
+        signal(SIGINT, SIG_DFL);
+        signal(SIGHUP, SIG_DFL);
+        /* Redirect stdout/stderr to pipes, exec proot */
         dup2(pipe_stdout[1], STDOUT_FILENO);
         dup2(pipe_stderr[1], STDERR_FILENO);
         close(pipe_stdout[0]);
